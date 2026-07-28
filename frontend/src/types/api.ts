@@ -176,10 +176,9 @@ export interface LoginRequest {
 }
 
 export interface RegisterRequest {
-  name: string;
+  display_name: string;
   email: string;
   password: string;
-  organizationName?: string;
 }
 
 export interface CreateTaskDTO {
