@@ -19,5 +19,6 @@ linters-settings:
     simplify: true
 run:
   timeout: 5m
-  skip-dirs:
+issues:
+  exclude-dirs:
     - vendor
