@@ -31,14 +31,14 @@ func main() {
 		slog.Error("failed to connect to database", "error", err)
 		os.Exit(1)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	rdb, err := redis.NewClient(ctx, cfg.Redis.URL, cfg.Redis.Password, cfg.Redis.DB)
 	if err != nil {
 		slog.Error("failed to connect to redis", "error", err)
 		os.Exit(1)
 	}
-	defer rdb.Close()
+	defer func() { _ = rdb.Close() }()
 
 	slog.Info("worker started")
 

@@ -107,7 +107,6 @@ func (r *TaskRepository) List(ctx context.Context, filter task.TaskFilter) ([]ta
 	if filter.Limit > 0 {
 		query += fmt.Sprintf(" LIMIT $%d", argIdx)
 		args = append(args, filter.Limit)
-		argIdx++
 	}
 
 	rows, err := r.pool.Query(ctx, query, args...)

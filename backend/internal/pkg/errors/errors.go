@@ -1,3 +1,4 @@
+// Package errors provides domain error types and HTTP status mapping.
 package errors
 
 import (
@@ -8,13 +9,13 @@ import (
 type Code string
 
 const (
-	CodeNotFound        Code = "NOT_FOUND"
-	CodeValidation      Code = "VALIDATION_ERROR"
-	CodeUnauthorized    Code = "UNAUTHORIZED"
-	CodeForbidden       Code = "FORBIDDEN"
-	CodeConflict        Code = "CONFLICT"
-	CodeInternal        Code = "INTERNAL_ERROR"
-	CodeRateLimited     Code = "TOO_MANY_REQUESTS"
+	CodeNotFound     Code = "NOT_FOUND"
+	CodeValidation   Code = "VALIDATION_ERROR"
+	CodeUnauthorized Code = "UNAUTHORIZED"
+	CodeForbidden    Code = "FORBIDDEN"
+	CodeConflict     Code = "CONFLICT"
+	CodeInternal     Code = "INTERNAL_ERROR"
+	CodeRateLimited  Code = "TOO_MANY_REQUESTS"
 )
 
 type DomainError struct {

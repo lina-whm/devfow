@@ -28,9 +28,9 @@ func NewProjectHandler(service *application_project.Service) *ProjectHandler {
 }
 
 type createProjectRequest struct {
-	Name        string  `json:"name" binding:"required,min=1,max=100"`
-	Key         string  `json:"key" binding:"required,min=2,max=10"`
-	Description string  `json:"description"`
+	Name        string `json:"name" binding:"required,min=1,max=100"`
+	Key         string `json:"key" binding:"required,min=2,max=10"`
+	Description string `json:"description"`
 }
 
 type updateProjectRequest struct {

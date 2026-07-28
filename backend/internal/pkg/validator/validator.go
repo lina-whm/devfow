@@ -1,3 +1,4 @@
+// Package validator provides validation utilities for domain types.
 package validator
 
 import (

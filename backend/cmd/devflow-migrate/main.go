@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -26,11 +27,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("connect: %v", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	migrationsDir := filepath.Join("internal", "infrastructure", "postgres", "migrations")
-	if err := goose.Run(command, db, migrationsDir); err != nil {
-		log.Fatalf("migration %s: %v", command, err)
+	ctx := context.Background()
+	if err := goose.RunContext(ctx, command, db, migrationsDir); err != nil {
+		log.Fatalf("migration failed: %v", err)
 	}
 
 	fmt.Printf("migration %s completed successfully\n", command)

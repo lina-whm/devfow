@@ -130,7 +130,7 @@ func (r *ColumnRepository) Reorder(ctx context.Context, boardID uuid.UUID, colum
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	for i, colID := range columnIDs {
 		if _, err := tx.Exec(ctx,

@@ -5,9 +5,9 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
+	_ "github.com/devflow/devflow-backend/internal/api/docs"
 	"github.com/devflow/devflow-backend/internal/api/handler"
 	"github.com/devflow/devflow-backend/internal/api/middleware"
-	_ "github.com/devflow/devflow-backend/internal/api/docs"
 )
 
 func Setup(

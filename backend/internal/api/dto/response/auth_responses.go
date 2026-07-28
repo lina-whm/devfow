@@ -1,3 +1,4 @@
+// Package response contains HTTP response DTO types.
 package response
 
 type AuthResponse struct {

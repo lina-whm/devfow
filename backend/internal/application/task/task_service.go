@@ -69,30 +69,7 @@ func (s *Service) Update(ctx context.Context, id uuid.UUID, title, description s
 		return nil, ErrTaskNotFound
 	}
 
-	if title != "" {
-		t.Title = title
-	}
-	if description != "" {
-		t.Description = description
-	}
-	if taskType != "" && taskType.IsValid() {
-		t.Type = taskType
-	}
-	if priority != "" && priority.IsValid() {
-		t.Priority = priority
-	}
-	if status != "" && status.IsValid() {
-		if err := t.ChangeStatus(status); err != nil {
-			return nil, ErrInvalidTransition
-		}
-	}
-	if assigneeID != nil {
-		if *assigneeID == uuid.Nil {
-			t.Unassign()
-		} else {
-			t.Assign(*assigneeID)
-		}
-	}
+	applyTaskFields(t, title, description, taskType, priority, status, assigneeID)
 
 	if err := t.Validate(); err != nil {
 		return nil, fmt.Errorf("validate: %w", err)
@@ -108,6 +85,33 @@ func (s *Service) Update(ctx context.Context, id uuid.UUID, title, description s
 		}
 	}
 	return t, nil
+}
+
+func applyTaskFields(t *task.Task, title, description string, taskType task.Type, priority task.Priority, status task.Status, assigneeID *uuid.UUID) {
+	if title != "" {
+		t.Title = title
+	}
+	if description != "" {
+		t.Description = description
+	}
+	if taskType != "" && taskType.IsValid() {
+		t.Type = taskType
+	}
+	if priority != "" && priority.IsValid() {
+		t.Priority = priority
+	}
+	if status != "" && status.IsValid() {
+		if err := t.ChangeStatus(status); err != nil {
+			return
+		}
+	}
+	if assigneeID != nil {
+		if *assigneeID == uuid.Nil {
+			t.Unassign()
+		} else {
+			t.Assign(*assigneeID)
+		}
+	}
 }
 
 func (s *Service) Move(ctx context.Context, id uuid.UUID, columnID uuid.UUID, position float64, versionID int) (*task.Task, error) {

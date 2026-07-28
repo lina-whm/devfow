@@ -1,3 +1,4 @@
+// Package request contains HTTP request DTO types.
 package request
 
 type CreateTaskRequest struct {
@@ -11,13 +12,13 @@ type CreateTaskRequest struct {
 }
 
 type UpdateTaskRequest struct {
-	Title       string   `json:"title" binding:"omitempty,min=1,max=255"`
-	Description string   `json:"description"`
-	Type        string   `json:"type" binding:"omitempty,oneof=task bug story epic"`
-	Priority    string   `json:"priority" binding:"omitempty,oneof=none low medium high critical"`
-	Status      string   `json:"status" binding:"omitempty,oneof=backlog todo in_progress in_review done cancelled"`
-	AssigneeID  *string  `json:"assignee_id"`
-	VersionID   int      `json:"version_id"`
+	Title       string  `json:"title" binding:"omitempty,min=1,max=255"`
+	Description string  `json:"description"`
+	Type        string  `json:"type" binding:"omitempty,oneof=task bug story epic"`
+	Priority    string  `json:"priority" binding:"omitempty,oneof=none low medium high critical"`
+	Status      string  `json:"status" binding:"omitempty,oneof=backlog todo in_progress in_review done cancelled"`
+	AssigneeID  *string `json:"assignee_id"`
+	VersionID   int     `json:"version_id"`
 }
 
 type MoveTaskRequest struct {
