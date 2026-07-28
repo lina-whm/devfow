@@ -6,4 +6,58 @@ services:
     environment:
       POSTGRES_DB: devflow
       POSTGRES_USER: devflow
-      POST
+      POSTGRES_PASSWORD: devflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U devflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: postgres://devflow:devflow@postgres:5432/devflow?sslmode=disable
+      REDIS_URL: redis://redis:6379/0
+      SERVER_PORT: 8080
+      SERVER_MODE: release
+      JWT_SECRET: change-me-in-production
+      JWT_REFRESH_SECRET: change-me-in-production-too
+      JWT_ACCESS_TTL: 15m
+      JWT_REFRESH_TTL: 7d
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8080/api/v1
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
