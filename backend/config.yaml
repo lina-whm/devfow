@@ -1,0 +1,12 @@
+database:
+  url: postgres://postgres:postgres@localhost:5432/devflow?sslmode=disable
+redis:
+  url: redis://localhost:6379/0
+jwt:
+  secret: devflow-jwt-secret
+  refresh_secret: devflow-jwt-refresh-secret
+server:
+  mode: development
+  port: 8080
+logger:
+  format: console
