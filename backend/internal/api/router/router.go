@@ -48,6 +48,7 @@ func Setup(
 		authed := api.Group("")
 		authed.Use(middleware.Auth(jwtSecret))
 		{
+			authed.GET("/auth/me", ah.Me)
 			orgs := authed.Group("/organizations")
 			{
 				orgs.POST("", oh.Create)

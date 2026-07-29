@@ -19,6 +19,7 @@ import (
 type authService interface {
 	Register(ctx context.Context, email, password, displayName string) (*auth.AuthUser, error)
 	Login(ctx context.Context, email, password string) (*auth.AuthUser, error)
+	GetByID(ctx context.Context, id string) (*auth.AuthUser, error)
 	Refresh(ctx context.Context, refreshToken string) (*auth.AuthUser, error)
 	VerifyEmail(ctx context.Context, email string) error
 	ForgotPassword(ctx context.Context, email string) error
@@ -136,6 +137,29 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		ExpiresIn:    int(h.accessTTL.Seconds()),
+	})
+}
+
+func (h *AuthHandler) Me(c *gin.Context) {
+	userID, _ := c.Get("user_id")
+	uid, ok := userID.(string)
+	if !ok || uid == "" {
+		c.JSON(http.StatusUnauthorized, response.NewErrorResponse("UNAUTHORIZED", "user not found"))
+		return
+	}
+
+	user, err := h.authService.GetByID(c.Request.Context(), uid)
+	if err != nil {
+		c.JSON(http.StatusNotFound, response.NewErrorResponse("NOT_FOUND", "user not found"))
+		return
+	}
+
+	c.JSON(http.StatusOK, response.UserResponse{
+		ID:          user.ID,
+		Email:       user.Email,
+		DisplayName: user.DisplayName,
+		AvatarURL:   user.AvatarURL,
+		CreatedAt:   "",
 	})
 }
 

@@ -46,7 +46,7 @@ export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [orgExpanded, setOrgExpanded] = useState(true);
 
-  const initials = user?.name
+  const initials = user?.display_name
     ?.split(' ')
     .map((n) => n[0])
     .join('')
@@ -132,12 +132,12 @@ export function Sidebar() {
                 className={cn('w-full gap-2', collapsed ? 'justify-center px-2' : 'justify-start')}
               >
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={user.avatarUrl ?? undefined} />
+                  <AvatarImage src={user.avatar_url ?? undefined} />
                   <AvatarFallback className="text-xs">{initials}</AvatarFallback>
                 </Avatar>
                 {!collapsed && (
                   <div className="flex-1 text-left">
-                    <p className="text-sm font-medium leading-none">{user.name}</p>
+                    <p className="text-sm font-medium leading-none">{user.display_name}</p>
                     <p className="text-xs text-muted-foreground">{user.email}</p>
                   </div>
                 )}

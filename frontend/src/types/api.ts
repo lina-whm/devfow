@@ -1,10 +1,9 @@
 export interface User {
   id: string;
   email: string;
-  name: string;
-  avatarUrl: string | null;
-  createdAt: string;
-  updatedAt: string;
+  display_name: string;
+  avatar_url: string;
+  created_at: string;
 }
 
 export interface Organization {
@@ -165,9 +164,9 @@ export interface CursorPagination<T> {
 }
 
 export interface AuthResponse {
-  user: User;
-  accessToken: string;
-  refreshToken: string;
+  access_token: string;
+  refresh_token: string;
+  expires_in: number;
 }
 
 export interface LoginRequest {

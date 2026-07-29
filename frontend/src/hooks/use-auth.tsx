@@ -45,16 +45,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loginMutation = useMutation<AuthResponse, APIError, LoginRequest>({
     mutationFn: (data) => apiClient.post('/auth/login', data),
     onSuccess: (response) => {
-      storeTokens(response.accessToken, response.refreshToken);
-      queryClient.setQueryData(['current-user'], response.user);
+      storeTokens(response.access_token, response.refresh_token);
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
     },
   });
 
   const registerMutation = useMutation<AuthResponse, APIError, RegisterRequest>({
     mutationFn: (data) => apiClient.post('/auth/register', data),
     onSuccess: (response) => {
-      storeTokens(response.accessToken, response.refreshToken);
-      queryClient.setQueryData(['current-user'], response.user);
+      storeTokens(response.access_token, response.refresh_token);
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
     },
   });
 

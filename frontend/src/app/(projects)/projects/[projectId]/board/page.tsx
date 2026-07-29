@@ -131,9 +131,9 @@ function TaskCardContent({ task, isDragging }: { task: Task; isDragging?: boolea
           </div>
           {task.assignee && (
             <Avatar className="h-6 w-6 ring-2 ring-background">
-              <AvatarImage src={task.assignee.avatarUrl ?? undefined} />
+              <AvatarImage src={task.assignee.avatar_url ?? undefined} />
               <AvatarFallback className="text-[9px] font-medium">
-                {task.assignee.name
+                {task.assignee.display_name
                   .split(' ')
                   .map((n) => n[0])
                   .join('')
@@ -187,12 +187,12 @@ function TaskDetailDialog() {
               {selectedTask.assignee ? (
                 <div className="flex items-center gap-2">
                   <Avatar className="h-6 w-6">
-                    <AvatarImage src={selectedTask.assignee.avatarUrl ?? undefined} />
+                    <AvatarImage src={selectedTask.assignee.avatar_url ?? undefined} />
                     <AvatarFallback className="text-[9px]">
-                      {selectedTask.assignee.name.charAt(0).toUpperCase()}
+                      {selectedTask.assignee.display_name.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  <span>{selectedTask.assignee.name}</span>
+                  <span>{selectedTask.assignee.display_name}</span>
                 </div>
               ) : (
                 <span className="text-muted-foreground">-</span>

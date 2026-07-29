@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/devflow/devflow-backend/internal/domain/user"
@@ -76,6 +77,28 @@ func (s *Service) Login(ctx context.Context, email, password string) (*AuthUser,
 		Email:        u.Email,
 		PasswordHash: u.PasswordHash,
 		DisplayName:  u.DisplayName,
+	}, nil
+}
+
+func (s *Service) GetByID(ctx context.Context, id string) (*AuthUser, error) {
+	uid, err := uuid.Parse(id)
+	if err != nil {
+		return nil, fmt.Errorf("parse id: %w", err)
+	}
+	u, err := s.userRepo.FindByID(ctx, uid)
+	if err != nil {
+		return nil, ErrUserNotFound
+	}
+	avatarURL := ""
+	if u.AvatarURL != nil {
+		avatarURL = *u.AvatarURL
+	}
+	return &AuthUser{
+		ID:            u.ID.String(),
+		Email:         u.Email,
+		DisplayName:   u.DisplayName,
+		AvatarURL:     avatarURL,
+		EmailVerified: u.EmailVerifiedAt != nil,
 	}, nil
 }
 

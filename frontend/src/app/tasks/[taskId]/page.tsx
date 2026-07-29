@@ -303,13 +303,13 @@ export default function TaskDetailPage() {
                 {task.assignee ? (
                   <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={task.assignee.avatarUrl ?? undefined} />
+                      <AvatarImage src={task.assignee.avatar_url ?? undefined} />
                       <AvatarFallback className="text-xs">
-                        {task.assignee.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                        {task.assignee.display_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="text-sm font-medium">{task.assignee.name}</p>
+                      <p className="text-sm font-medium">{task.assignee.display_name}</p>
                       <p className="text-xs text-muted-foreground">{task.assignee.email}</p>
                     </div>
                   </div>
@@ -324,13 +324,13 @@ export default function TaskDetailPage() {
                 <h4 className="text-sm font-medium text-muted-foreground mb-2">Reporter</h4>
                 <div className="flex items-center gap-3">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={task.reporter.avatarUrl ?? undefined} />
+                    <AvatarImage src={task.reporter.avatar_url ?? undefined} />
                     <AvatarFallback className="text-xs">
-                      {task.reporter.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                      {task.reporter.display_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="text-sm font-medium">{task.reporter.name}</p>
+                    <p className="text-sm font-medium">{task.reporter.display_name}</p>
                     <p className="text-xs text-muted-foreground">{task.reporter.email}</p>
                   </div>
                 </div>
@@ -402,14 +402,14 @@ export default function TaskDetailPage() {
             comments.map((comment) => (
               <div key={comment.id} className="flex gap-3">
                 <Avatar className="h-8 w-8 shrink-0">
-                  <AvatarImage src={comment.user.avatarUrl ?? undefined} />
+                  <AvatarImage src={comment.user.avatar_url ?? undefined} />
                   <AvatarFallback className="text-xs">
-                    {comment.user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                    {comment.user.display_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">{comment.user.name}</span>
+                    <span className="text-sm font-medium">{comment.user.display_name}</span>
                     <span className="text-xs text-muted-foreground">
                       {format(new Date(comment.createdAt), 'MMM d, yyyy HH:mm')}
                     </span>
@@ -431,9 +431,9 @@ export default function TaskDetailPage() {
 
           <div className="flex gap-3">
             <Avatar className="h-8 w-8 shrink-0">
-              <AvatarImage src={user?.avatarUrl ?? undefined} />
+              <AvatarImage src={user?.avatar_url ?? undefined} />
               <AvatarFallback className="text-xs">
-                {user?.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) ?? 'U'}
+                {user?.display_name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) ?? 'U'}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 flex gap-2">
