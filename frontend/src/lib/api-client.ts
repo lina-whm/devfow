@@ -22,6 +22,7 @@ class ApiClient {
 
   private handleRequest(config: InternalAxiosRequestConfig): InternalAxiosRequestConfig {
     const token = getAccessToken();
+    if (config.url) console.debug(`[api] ${config.method?.toUpperCase()} ${config.url} token=${token ? token.slice(0,20)+'...' : 'null'}`);
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -31,11 +32,15 @@ class ApiClient {
   private async handleResponseError(error: AxiosError): Promise<AxiosResponse> {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
+    console.debug(`[api error] ${error.config?.url} status=${error.response?.status}`);
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
+      console.debug('[api error] attempting token refresh');
 
       try {
         const refreshToken = getRefreshToken();
+        console.debug(`[api error] refreshToken=${refreshToken ? refreshToken.slice(0,20)+'...' : 'null'}`);
         if (!refreshToken) {
           throw new Error('No refresh token');
         }
@@ -45,6 +50,7 @@ class ApiClient {
         });
 
         const { access_token, refresh_token: newRefreshToken } = response.data;
+        console.debug('[api error] refresh OK, storing new tokens');
         storeTokens(access_token, newRefreshToken);
 
         if (originalRequest.headers) {
@@ -52,7 +58,9 @@ class ApiClient {
         }
 
         return this.instance(originalRequest);
-      } catch {
+      } catch (refreshError: unknown) {
+        const axiosErr = refreshError as AxiosError;
+        console.debug('[api error] refresh FAILED', axiosErr.response?.status || axiosErr.message);
         clearTokens();
         if (typeof window !== 'undefined') {
           window.location.href = '/login';

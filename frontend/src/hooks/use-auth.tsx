@@ -22,11 +22,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     const token = getAccessToken();
+    console.debug(`[AuthProvider] mount token=${token ? token.slice(0,20)+'...' : 'null'}`);
     if (!token) {
+      setUser(null);
       setIsLoading(false);
       return;
     }
-    apiClient.get<User>('/auth/me').then(setUser).catch(() => {
+    apiClient.get<User>('/auth/me').then((u) => {
+      console.debug('[AuthProvider] /auth/me OK', u.email);
+      setUser(u);
+    }).catch((e) => {
+      console.debug('[AuthProvider] /auth/me FAILED', e?.response?.status, e?.message);
       clearTokens();
       setUser(null);
     }).finally(() => setIsLoading(false));
