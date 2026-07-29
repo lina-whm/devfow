@@ -42,19 +42,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     retry: false,
   });
 
+  const fetchUser = React.useCallback(async () => {
+    try {
+      return await apiClient.get<User>('/auth/me');
+    } catch {
+      clearTokens();
+      return null;
+    }
+  }, []);
+
   const loginMutation = useMutation<AuthResponse, APIError, LoginRequest>({
     mutationFn: (data) => apiClient.post('/auth/login', data),
-    onSuccess: (response) => {
+    onSuccess: async (response) => {
       storeTokens(response.access_token, response.refresh_token);
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      const user = await fetchUser();
+      queryClient.setQueryData(['current-user'], user);
     },
   });
 
   const registerMutation = useMutation<AuthResponse, APIError, RegisterRequest>({
     mutationFn: (data) => apiClient.post('/auth/register', data),
-    onSuccess: (response) => {
+    onSuccess: async (response) => {
       storeTokens(response.access_token, response.refresh_token);
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      const user = await fetchUser();
+      queryClient.setQueryData(['current-user'], user);
     },
   });
 
