@@ -47,7 +47,7 @@ func main() {
 		slog.Error("failed to connect to database", "error", err)
 		os.Exit(1)
 	}
-	defer func() { _ = pool.Close() }()
+	defer pool.Close()
 
 	rdb, err := redis.NewClient(ctx, cfg.Redis.URL, cfg.Redis.Password, cfg.Redis.DB)
 	if err != nil {

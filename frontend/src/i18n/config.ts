@@ -5,15 +5,25 @@ import ru from './ru.json';
 
 const resources = { en: { translation: en }, ru: { translation: ru } };
 
-const savedLang = typeof window !== 'undefined' ? localStorage.getItem('locale') : null;
-const browserLang = typeof window !== 'undefined' ? navigator.language.split('-')[0] : 'en';
-const defaultLang = savedLang || (browserLang === 'ru' ? 'ru' : 'en');
-
 i18n.use(initReactI18next).init({
   resources,
-  lng: defaultLang,
+  lng: 'en',
   fallbackLng: 'en',
   interpolation: { escapeValue: false },
 });
+
+i18n.on('languageChanged', (lng) => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('locale', lng);
+  }
+});
+
+export function getSavedLocale(): string | null {
+  if (typeof window === 'undefined') return null;
+  const saved = localStorage.getItem('locale');
+  if (saved) return saved;
+  const browser = navigator.language.split('-')[0];
+  return browser === 'ru' ? 'ru' : 'en';
+}
 
 export default i18n;
