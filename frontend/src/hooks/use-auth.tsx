@@ -1,16 +1,9 @@
 'use client';
 
 import * as React from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { storeTokens, clearTokens, getAccessToken } from '@/lib/auth';
-import type {
-  User,
-  AuthResponse,
-  LoginRequest,
-  RegisterRequest,
-  APIError,
-} from '@/types/api';
+import type { User, AuthResponse, LoginRequest, RegisterRequest, APIError } from '@/types/api';
 
 interface AuthContextValue {
   user: User | null;
@@ -24,107 +17,51 @@ interface AuthContextValue {
 const AuthContext = React.createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const queryClient = useQueryClient();
+  const [user, setUser] = React.useState<User | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
 
-  const { data: user, isLoading } = useQuery<User | null>({
-    queryKey: ['current-user'],
-    queryFn: async () => {
-      const token = getAccessToken();
-      if (!token) return null;
-      try {
-        return await apiClient.get<User>('/auth/me');
-      } catch {
-        clearTokens();
-        return null;
-      }
-    },
-    staleTime: 5 * 60 * 1000,
-    retry: false,
-  });
+  React.useEffect(() => {
+    const token = getAccessToken();
+    if (!token) {
+      setIsLoading(false);
+      return;
+    }
+    apiClient.get<User>('/auth/me').then(setUser).catch(() => {
+      clearTokens();
+      setUser(null);
+    }).finally(() => setIsLoading(false));
+  }, []);
 
-  const loginMutation = useMutation<AuthResponse, APIError, LoginRequest>({
-    mutationFn: (data) => apiClient.post('/auth/login', data),
-    onSuccess: async (response) => {
-      storeTokens(response.access_token, response.refresh_token);
-      try {
-        const user = await apiClient.get<User>('/auth/me');
-        queryClient.setQueryData(['current-user'], user);
-      } catch {
-        clearTokens();
-      }
-    },
-  });
+  const login = async (data: LoginRequest) => {
+    const response = await apiClient.post<AuthResponse>('/auth/login', data);
+    storeTokens(response.access_token, response.refresh_token);
+    const userData = await apiClient.get<User>('/auth/me');
+    setUser(userData);
+  };
 
-  const registerMutation = useMutation<AuthResponse, APIError, RegisterRequest>({
-    mutationFn: (data) => apiClient.post('/auth/register', data),
-    onSuccess: async (response) => {
-      storeTokens(response.access_token, response.refresh_token);
-      try {
-        const user = await apiClient.get<User>('/auth/me');
-        queryClient.setQueryData(['current-user'], user);
-      } catch {
-        clearTokens();
-      }
-    },
-  });
+  const register = async (data: RegisterRequest) => {
+    const response = await apiClient.post<AuthResponse>('/auth/register', data);
+    storeTokens(response.access_token, response.refresh_token);
+    const userData = await apiClient.get<User>('/auth/me');
+    setUser(userData);
+  };
 
   const logout = React.useCallback(() => {
     clearTokens();
-    queryClient.setQueryData(['current-user'], null);
-    queryClient.clear();
-    window.location.href = '/login';
-  }, [queryClient]);
+    setUser(null);
+  }, []);
 
-  const value: AuthContextValue = {
-    user: user ?? null,
-    isLoading,
-    isAuthenticated: !!user,
-    login: async (data) => {
-      await loginMutation.mutateAsync(data);
-    },
-    register: async (data) => {
-      await registerMutation.mutateAsync(data);
-    },
-    logout,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider
+      value={{ user, isLoading, isAuthenticated: !!user, login, register, logout }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth(): AuthContextValue {
   const context = React.useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within an AuthProvider');
   return context;
-}
-
-export function useLoginMutation() {
-  return useMutation<AuthResponse, APIError, LoginRequest>({
-    mutationFn: (data) => apiClient.post('/auth/login', data),
-  });
-}
-
-export function useRegisterMutation() {
-  return useMutation<AuthResponse, APIError, RegisterRequest>({
-    mutationFn: (data) => apiClient.post('/auth/register', data),
-  });
-}
-
-export function useCurrentUser() {
-  return useQuery<User | null>({
-    queryKey: ['current-user'],
-    queryFn: async () => {
-      const token = getAccessToken();
-      if (!token) return null;
-      try {
-        return await apiClient.get<User>('/auth/me');
-      } catch {
-        clearTokens();
-        return null;
-      }
-    },
-    staleTime: 5 * 60 * 1000,
-    retry: false,
-  });
 }
