@@ -5,11 +5,13 @@ const REFRESH_TOKEN_KEY = 'devflow_refresh_token';
 
 export function storeTokens(accessToken: string, refreshToken: string): void {
   Cookies.set(ACCESS_TOKEN_KEY, accessToken, {
+    path: '/',
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     expires: 1,
   });
   Cookies.set(REFRESH_TOKEN_KEY, refreshToken, {
+    path: '/',
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     expires: 7,
@@ -25,6 +27,6 @@ export function getRefreshToken(): string | undefined {
 }
 
 export function clearTokens(): void {
-  Cookies.remove(ACCESS_TOKEN_KEY);
-  Cookies.remove(REFRESH_TOKEN_KEY);
+  Cookies.remove(ACCESS_TOKEN_KEY, { path: '/' });
+  Cookies.remove(REFRESH_TOKEN_KEY, { path: '/' });
 }
