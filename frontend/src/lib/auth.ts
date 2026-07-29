@@ -1,32 +1,20 @@
-import Cookies from 'js-cookie';
-
 const ACCESS_TOKEN_KEY = 'devflow_access_token';
 const REFRESH_TOKEN_KEY = 'devflow_refresh_token';
 
 export function storeTokens(accessToken: string, refreshToken: string): void {
-  Cookies.set(ACCESS_TOKEN_KEY, accessToken, {
-    path: '/',
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    expires: 1,
-  });
-  Cookies.set(REFRESH_TOKEN_KEY, refreshToken, {
-    path: '/',
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    expires: 7,
-  });
+  localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+  localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
 }
 
-export function getAccessToken(): string | undefined {
-  return Cookies.get(ACCESS_TOKEN_KEY);
+export function getAccessToken(): string | null {
+  return localStorage.getItem(ACCESS_TOKEN_KEY);
 }
 
-export function getRefreshToken(): string | undefined {
-  return Cookies.get(REFRESH_TOKEN_KEY);
+export function getRefreshToken(): string | null {
+  return localStorage.getItem(REFRESH_TOKEN_KEY);
 }
 
 export function clearTokens(): void {
-  Cookies.remove(ACCESS_TOKEN_KEY, { path: '/' });
-  Cookies.remove(REFRESH_TOKEN_KEY, { path: '/' });
+  localStorage.removeItem(ACCESS_TOKEN_KEY);
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
 }

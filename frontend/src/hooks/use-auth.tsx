@@ -42,21 +42,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     retry: false,
   });
 
-  const fetchUser = React.useCallback(async () => {
-    try {
-      return await apiClient.get<User>('/auth/me');
-    } catch {
-      clearTokens();
-      return null;
-    }
-  }, []);
-
   const loginMutation = useMutation<AuthResponse, APIError, LoginRequest>({
     mutationFn: (data) => apiClient.post('/auth/login', data),
     onSuccess: async (response) => {
       storeTokens(response.access_token, response.refresh_token);
-      const user = await fetchUser();
-      queryClient.setQueryData(['current-user'], user);
+      try {
+        const user = await apiClient.get<User>('/auth/me');
+        queryClient.setQueryData(['current-user'], user);
+      } catch {
+        clearTokens();
+      }
     },
   });
 
@@ -64,8 +59,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     mutationFn: (data) => apiClient.post('/auth/register', data),
     onSuccess: async (response) => {
       storeTokens(response.access_token, response.refresh_token);
-      const user = await fetchUser();
-      queryClient.setQueryData(['current-user'], user);
+      try {
+        const user = await apiClient.get<User>('/auth/me');
+        queryClient.setQueryData(['current-user'], user);
+      } catch {
+        clearTokens();
+      }
     },
   });
 
