@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 
 const priorityColor: Record<string, string> = {
   urgent: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+  critical: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
   high: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
   medium: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
   low: 'bg-gray-100 text-gray-800 dark:bg-gray-800/50 dark:text-gray-400',
@@ -141,7 +142,7 @@ export default function DashboardPage() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
-            {t('dashboard.welcome', { name: user?.display_name?.split(' ')[0] ?? 'there' })}
+            {t('dashboard.welcome', { name: user?.displayName?.split(' ')[0] ?? 'there' })}
           </h1>
           <p className="mt-1 text-muted-foreground">
             {t('dashboard.subtitle')}
@@ -164,20 +165,22 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">{t('dashboard.stats.projects')}</CardTitle>
-            <div className="rounded-md bg-primary/10 p-2 text-primary">
-              <LayoutDashboard className="h-4 w-4" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{projectsCount}</div>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {orgs?.[0]?.name ?? t('projects.title')}
-            </p>
-          </CardContent>
-        </Card>
+        <Link href="/projects" className="block">
+          <Card className="transition-colors hover:bg-accent cursor-pointer">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">{t('dashboard.stats.projects')}</CardTitle>
+              <div className="rounded-md bg-primary/10 p-2 text-primary">
+                <LayoutDashboard className="h-4 w-4" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{projectsCount}</div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {orgs?.[0]?.name ?? t('projects.title')}
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -281,7 +284,7 @@ export default function DashboardPage() {
                 {myTasks.slice(0, 5).map((task) => (
                   <Link
                     key={task.id}
-                    href={`/projects/${task.projectId}/tasks/${task.id}`}
+                    href={`/tasks/${task.id}`}
                     className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-accent"
                   >
                     <div className="min-w-0 flex-1">

@@ -116,6 +116,36 @@ func (s *Service) VerifyEmail(ctx context.Context, email string) error {
 	return s.userRepo.Update(ctx, u)
 }
 
+func (s *Service) UpdateProfile(ctx context.Context, userID string, displayName string, avatarURL string) (*AuthUser, error) {
+	uid, err := uuid.Parse(userID)
+	if err != nil {
+		return nil, fmt.Errorf("parse id: %w", err)
+	}
+	u, err := s.userRepo.FindByID(ctx, uid)
+	if err != nil {
+		return nil, ErrUserNotFound
+	}
+	if displayName != "" {
+		u.DisplayName = displayName
+	}
+	if avatarURL != "" {
+		u.AvatarURL = &avatarURL
+	}
+	if err := s.userRepo.Update(ctx, u); err != nil {
+		return nil, fmt.Errorf("update user: %w", err)
+	}
+	avatar := ""
+	if u.AvatarURL != nil {
+		avatar = *u.AvatarURL
+	}
+	return &AuthUser{
+		ID:          u.ID.String(),
+		Email:       u.Email,
+		DisplayName: u.DisplayName,
+		AvatarURL:   avatar,
+	}, nil
+}
+
 func (s *Service) ForgotPassword(ctx context.Context, email string) error {
 	_, err := s.userRepo.FindByEmail(ctx, email)
 	if err != nil {

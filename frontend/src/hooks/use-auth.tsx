@@ -40,14 +40,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (data: LoginRequest) => {
     const response = await apiClient.post<AuthResponse>('/auth/login', data);
-    storeTokens(response.access_token, response.refresh_token);
+    storeTokens(response.accessToken, response.refreshToken);
     const userData = await apiClient.get<User>('/auth/me');
     setUser(userData);
   };
 
   const register = async (data: RegisterRequest) => {
     const response = await apiClient.post<AuthResponse>('/auth/register', data);
-    storeTokens(response.access_token, response.refresh_token);
+    storeTokens(response.accessToken, response.refreshToken);
     const userData = await apiClient.get<User>('/auth/me');
     setUser(userData);
   };

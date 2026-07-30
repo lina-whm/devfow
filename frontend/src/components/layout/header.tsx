@@ -33,7 +33,7 @@ export function Header() {
   const { data: unreadCount } = useUnreadCount();
   const { t } = useTranslation();
 
-  const initials = user?.display_name
+  const initials = user?.displayName
     ?.split(' ')
     .map((n) => n[0])
     .join('')
@@ -73,7 +73,7 @@ export function Header() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={user.avatar_url ?? undefined} />
+                <AvatarImage src={user.avatarUrl ?? undefined} />
                 <AvatarFallback className="text-xs">{initials}</AvatarFallback>
               </Avatar>
             </Button>
@@ -81,7 +81,7 @@ export function Header() {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuItem disabled>
               <div className="flex flex-col">
-                <span className="font-medium">{user.display_name}</span>
+                <span className="font-medium">{user.displayName}</span>
                 <span className="text-xs text-muted-foreground">{user.email}</span>
               </div>
             </DropdownMenuItem>

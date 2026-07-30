@@ -6,6 +6,7 @@ import { useProject } from '@/hooks/use-projects';
 import { useBoard } from '@/hooks/use-board';
 import { useTasks, useMoveTask } from '@/hooks/use-tasks';
 import { useBoardStore } from '@/stores/board-store';
+import { ProjectSettings } from '@/components/project-settings';
 import * as Tabs from '@radix-ui/react-tabs';
 import { DndContext, DragOverlay, useSensor, useSensors, PointerSensor, closestCorners, type DragStartEvent, type DragOverEvent, type DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -19,7 +20,6 @@ import {
   ArrowDown,
   Plus,
   Search,
-  Settings as SettingsIcon,
   GripVertical,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -48,13 +48,16 @@ import { Separator } from '@/components/ui/separator';
 import type { Task, Column, TaskType, TaskPriority, TaskStatus } from '@/types/api';
 import { useTranslation } from 'react-i18next';
 
-const priorityConfig: Record<TaskPriority, { icon: typeof AlertCircle | null; className: string }> = {
+const priorityConfig: Record<string, { icon: typeof AlertCircle | null; className: string }> = {
   urgent: { icon: AlertCircle, className: 'text-red-500' },
+  critical: { icon: AlertCircle, className: 'text-red-500' },
   high: { icon: ArrowUp, className: 'text-orange-500' },
   medium: { icon: Minus, className: 'text-yellow-500' },
   low: { icon: ArrowDown, className: 'text-blue-500' },
   none: { icon: null, className: '' },
 };
+
+function pc(key: string) { return priorityConfig[key] ?? { icon: null, className: '' }; }
 
 const typeBadgeVariant: Record<TaskType, 'default' | 'secondary' | 'destructive' | 'outline' | 'success' | 'warning'> = {
   bug: 'destructive',
@@ -116,7 +119,7 @@ function SortableTaskCard({ task }: { task: Task }) {
 
 function TaskCardContent({ task, isDragging }: { task: Task; isDragging?: boolean }) {
   const { setSelectedTask } = useBoardStore();
-  const PriorityIcon = priorityConfig[task.priority].icon;
+  const PriorityIcon = pc(task.priority).icon;
 
   return (
     <motion.div
@@ -144,7 +147,7 @@ function TaskCardContent({ task, isDragging }: { task: Task; isDragging?: boolea
           </Badge>
           <div className="flex items-center gap-1 shrink-0">
             {PriorityIcon && (
-              <PriorityIcon className={cn('h-3.5 w-3.5', priorityConfig[task.priority].className)} />
+              <PriorityIcon className={cn('h-3.5 w-3.5', pc(task.priority).className)} />
             )}
             <GripVertical className="h-3.5 w-3.5 text-muted-foreground/40" />
           </div>
@@ -168,9 +171,9 @@ function TaskCardContent({ task, isDragging }: { task: Task; isDragging?: boolea
           </div>
           {task.assignee && (
             <Avatar className="h-6 w-6 ring-2 ring-background">
-              <AvatarImage src={task.assignee.avatar_url ?? undefined} />
+              <AvatarImage src={task.assignee.avatarUrl ?? undefined} />
               <AvatarFallback className="text-[9px] font-medium">
-                {task.assignee.display_name
+                {task.assignee.displayName
                   .split(' ')
                   .map((n) => n[0])
                   .join('')
@@ -191,7 +194,7 @@ function TaskDetailDialog() {
 
   if (!selectedTask) return null;
 
-  const PriorityIcon = priorityConfig[selectedTask.priority].icon;
+  const PriorityIcon = pc(selectedTask.priority).icon;
 
   return (
     <Dialog open={!!selectedTask} onOpenChange={(open) => !open && setSelectedTask(null)}>
@@ -202,7 +205,7 @@ function TaskDetailDialog() {
               {selectedTask.type}
             </Badge>
             {selectedTask.priority !== 'none' && PriorityIcon && (
-              <PriorityIcon className={cn('h-4 w-4', priorityConfig[selectedTask.priority].className)} />
+              <PriorityIcon className={cn('h-4 w-4', pc(selectedTask.priority).className)} />
             )}
           </div>
           <DialogTitle className="text-xl">{selectedTask.title}</DialogTitle>
@@ -224,12 +227,12 @@ function TaskDetailDialog() {
               {selectedTask.assignee ? (
                 <div className="flex items-center gap-2">
                   <Avatar className="h-6 w-6">
-                    <AvatarImage src={selectedTask.assignee.avatar_url ?? undefined} />
+                    <AvatarImage src={selectedTask.assignee.avatarUrl ?? undefined} />
                     <AvatarFallback className="text-[9px]">
-                      {selectedTask.assignee.display_name.charAt(0).toUpperCase()}
+                      {selectedTask.assignee.displayName.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  <span>{selectedTask.assignee.display_name}</span>
+                  <span>{selectedTask.assignee.displayName}</span>
                 </div>
               ) : (
                 <span className="text-muted-foreground">-</span>
@@ -243,12 +246,12 @@ function TaskDetailDialog() {
             </div>
             <div>
               <p className="text-muted-foreground text-xs font-medium mb-1">{t('common.update')}</p>
-              <span>{format(new Date(selectedTask.updatedAt), 'MMM d, yyyy')}</span>
+              <span>{selectedTask.updatedAt ? format(new Date(selectedTask.updatedAt), 'MMM d, yyyy') : '-'}</span>
             </div>
           </div>
         </div>
 
-        {selectedTask.tags.length > 0 && (
+        {selectedTask.tags?.length > 0 && (
           <>
             <Separator />
             <div className="flex flex-wrap gap-1.5">
@@ -610,7 +613,7 @@ function BacklogView() {
 
 function BacklogRow({ task }: { task: Task }) {
   const { setSelectedTask } = useBoardStore();
-  const PriorityIcon = priorityConfig[task.priority].icon;
+  const PriorityIcon = pc(task.priority).icon;
 
   return (
     <motion.div
@@ -634,7 +637,7 @@ function BacklogRow({ task }: { task: Task }) {
       <div className="col-span-2 flex items-center gap-1.5">
         {PriorityIcon ? (
           <>
-            <PriorityIcon className={cn('h-3.5 w-3.5', priorityConfig[task.priority].className)} />
+            <PriorityIcon className={cn('h-3.5 w-3.5', pc(task.priority).className)} />
             <span className="text-xs capitalize text-muted-foreground">{task.priority}</span>
           </>
         ) : (
@@ -649,9 +652,9 @@ function BacklogRow({ task }: { task: Task }) {
       <div className="col-span-1">
         {task.assignee ? (
           <Avatar className="h-7 w-7">
-            <AvatarImage src={task.assignee.avatar_url ?? undefined} />
+            <AvatarImage src={task.assignee.avatarUrl ?? undefined} />
             <AvatarFallback className="text-[9px]">
-              {task.assignee.display_name.charAt(0).toUpperCase()}
+              {task.assignee.displayName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
         ) : (
@@ -666,14 +669,8 @@ function BacklogRow({ task }: { task: Task }) {
 }
 
 function SettingsView() {
-  const { t } = useTranslation();
-  return (
-    <div className="flex flex-col items-center justify-center h-64 text-muted-foreground gap-3">
-      <SettingsIcon className="h-8 w-8" />
-      <p className="text-sm font-medium">{t('projects.settings')}</p>
-      <p className="text-xs">{t('common.loading')}</p>
-    </div>
-  );
+  const params = useParams();
+  return <ProjectSettings projectId={params.projectId as string} />;
 }
 
 export default function ProjectDetailPage() {

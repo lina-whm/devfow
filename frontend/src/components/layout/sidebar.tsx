@@ -10,9 +10,6 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Settings,
-  Moon,
-  Sun,
   LogOut,
   User as UserIcon,
 } from 'lucide-react';
@@ -29,7 +26,6 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/hooks/use-auth';
-import { useTheme } from 'next-themes';
 import { useTranslation } from 'react-i18next';
 
 const navItems = [
@@ -41,12 +37,11 @@ const navItems = [
 export function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
-  const { theme, setTheme } = useTheme();
   const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
   const [orgExpanded, setOrgExpanded] = useState(true);
 
-  const initials = user?.display_name
+  const initials = user?.displayName
     ?.split(' ')
     .map((n) => n[0])
     .join('')
@@ -132,34 +127,23 @@ export function Sidebar() {
                 className={cn('w-full gap-2', collapsed ? 'justify-center px-2' : 'justify-start')}
               >
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={user.avatar_url ?? undefined} />
+                  <AvatarImage src={user.avatarUrl ?? undefined} />
                   <AvatarFallback className="text-xs">{initials}</AvatarFallback>
                 </Avatar>
                 {!collapsed && (
                   <div className="flex-1 text-left">
-                    <p className="text-sm font-medium leading-none">{user.display_name}</p>
+                    <p className="text-sm font-medium leading-none">{user.displayName}</p>
                     <p className="text-xs text-muted-foreground">{user.email}</p>
                   </div>
                 )}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" side="right" className="w-56">
-              <DropdownMenuItem>
-                <UserIcon className="mr-2 h-4 w-4" />
-                {t('nav.profile')}
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Settings className="mr-2 h-4 w-4" />
-                {t('nav.settings')}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
-                {theme === 'dark' ? (
-                  <Sun className="mr-2 h-4 w-4" />
-                ) : (
-                  <Moon className="mr-2 h-4 w-4" />
-                )}
-                {t('nav.settings')}
+              <DropdownMenuItem asChild>
+                <Link href="/profile">
+                  <UserIcon className="mr-2 h-4 w-4" />
+                  {t('nav.profile')}
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={logout}>

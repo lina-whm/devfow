@@ -3,9 +3,10 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useTasks } from '@/hooks/use-tasks';
+import { useProjects } from '@/hooks/use-projects';
+import { useOrganizations } from '@/hooks/use-organizations';
 import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -81,6 +82,10 @@ const typeVariant = (type: string) => {
 export default function TasksPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { data: orgs } = useOrganizations();
+  const orgId = orgs?.[0]?.id;
+  const { data: projects } = useProjects(orgId);
+  const firstProjectId = projects?.[0]?.id;
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
@@ -94,7 +99,7 @@ export default function TasksPage() {
     return f;
   }, [statusFilter, priorityFilter, search, user?.id]);
 
-  const { data, isLoading, error } = useTasks(undefined, filters);
+  const { data, isLoading, error } = useTasks(firstProjectId, filters);
 
   const filteredTasks = data?.data ?? [];
 

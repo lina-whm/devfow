@@ -333,6 +333,7 @@ func toTaskResponse(t *domain_task.Task) response.TaskResponse {
 		Priority:    string(t.Priority),
 		Status:      string(t.Status),
 		Position:    t.Position,
+		Tags:        []response.TaskTag{},
 		VersionID:   t.VersionID,
 		CreatedAt:   t.CreatedAt.UTC().Format(time.RFC3339),
 		UpdatedAt:   t.UpdatedAt.UTC().Format(time.RFC3339),

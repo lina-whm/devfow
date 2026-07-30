@@ -17,6 +17,7 @@ import (
 	"github.com/devflow/devflow-backend/internal/application/auth"
 	"github.com/devflow/devflow-backend/internal/application/comment"
 	"github.com/devflow/devflow-backend/internal/application/organization"
+	"github.com/devflow/devflow-backend/internal/application/board"
 	"github.com/devflow/devflow-backend/internal/application/project"
 	"github.com/devflow/devflow-backend/internal/application/task"
 	"github.com/devflow/devflow-backend/internal/application/team"
@@ -79,9 +80,11 @@ func main() {
 	projectSvc := project.NewService(projectRepo)
 	projectH := handler.NewProjectHandler(projectSvc)
 
-	_ = postgres.NewBoardRepository(pool)
-	_ = postgres.NewColumnRepository(pool)
+	boardRepo := postgres.NewBoardRepository(pool)
+	columnRepo := postgres.NewColumnRepository(pool)
 	taskRepo := postgres.NewTaskRepository(pool)
+	boardSvc := board.NewService(boardRepo, columnRepo, taskRepo)
+	bh := handler.NewBoardHandler(boardSvc)
 	taskSvc := task.NewService(taskRepo, userRepo)
 	taskH := handler.NewTaskHandler(taskSvc)
 
@@ -92,7 +95,7 @@ func main() {
 	healthH := handler.NewHealthHandler(pool, rdb)
 	authH := handler.NewAuthHandler(authSvc, rdb, cfg.JWT.Secret, cfg.JWT.RefreshSecret, cfg.JWT.AccessTTL, cfg.JWT.RefreshTTL)
 
-	r := router.Setup(authH, healthH, taskH, orgH, projectH, commentH, cfg.JWT.Secret)
+	r := router.Setup(authH, healthH, taskH, orgH, projectH, commentH, bh, cfg.JWT.Secret)
 	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	srv := &http.Server{

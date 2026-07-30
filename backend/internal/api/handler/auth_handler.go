@@ -24,6 +24,7 @@ type authService interface {
 	VerifyEmail(ctx context.Context, email string) error
 	ForgotPassword(ctx context.Context, email string) error
 	ResetPassword(ctx context.Context, email, newPassword string) error
+	UpdateProfile(ctx context.Context, userID string, displayName string, avatarURL string) (*auth.AuthUser, error)
 }
 
 type AuthHandler struct {
@@ -151,6 +152,40 @@ func (h *AuthHandler) Me(c *gin.Context) {
 	user, err := h.authService.GetByID(c.Request.Context(), uid)
 	if err != nil {
 		c.JSON(http.StatusNotFound, response.NewErrorResponse("NOT_FOUND", "user not found"))
+		return
+	}
+
+	c.JSON(http.StatusOK, response.UserResponse{
+		ID:          user.ID,
+		Email:       user.Email,
+		DisplayName: user.DisplayName,
+		AvatarURL:   user.AvatarURL,
+		CreatedAt:   "",
+	})
+}
+
+type updateMeRequest struct {
+	DisplayName string `json:"display_name"`
+	AvatarURL   string `json:"avatar_url"`
+}
+
+func (h *AuthHandler) UpdateMe(c *gin.Context) {
+	userID, _ := c.Get("user_id")
+	uid, ok := userID.(string)
+	if !ok || uid == "" {
+		c.JSON(http.StatusUnauthorized, response.NewErrorResponse("UNAUTHORIZED", "user not found"))
+		return
+	}
+
+	var req updateMeRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, response.NewErrorResponse("VALIDATION_ERROR", err.Error()))
+		return
+	}
+
+	user, err := h.authService.UpdateProfile(c.Request.Context(), uid, req.DisplayName, req.AvatarURL)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.NewErrorResponse("INTERNAL_ERROR", "failed to update profile"))
 		return
 	}
 

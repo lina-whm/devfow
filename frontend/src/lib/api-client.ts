@@ -3,6 +3,36 @@ import { getAccessToken, getRefreshToken, storeTokens, clearTokens } from './aut
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
 
+function snakeToCamel(obj: unknown): unknown {
+  if (Array.isArray(obj)) {
+    return obj.map(snakeToCamel);
+  }
+  if (obj !== null && typeof obj === 'object') {
+    const result: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj)) {
+      const camelKey = key.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+      result[camelKey] = snakeToCamel(value);
+    }
+    return result;
+  }
+  return obj;
+}
+
+function camelToSnake(obj: unknown): unknown {
+  if (Array.isArray(obj)) {
+    return obj.map(camelToSnake);
+  }
+  if (obj !== null && typeof obj === 'object') {
+    const result: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj)) {
+      const snakeKey = key.replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`);
+      result[snakeKey] = camelToSnake(value);
+    }
+    return result;
+  }
+  return obj;
+}
+
 class ApiClient {
   private instance: AxiosInstance;
 
@@ -11,6 +41,15 @@ class ApiClient {
       baseURL: BASE_URL,
       headers: { 'Content-Type': 'application/json' },
       timeout: 30000,
+      transformResponse: [
+        (data) => {
+          try {
+            return snakeToCamel(JSON.parse(data));
+          } catch {
+            return data;
+          }
+        },
+      ],
     });
 
     this.instance.interceptors.request.use(this.handleRequest.bind(this), Promise.reject);
@@ -25,6 +64,9 @@ class ApiClient {
     if (config.url) console.debug(`[api] ${config.method?.toUpperCase()} ${config.url} token=${token ? token.slice(0,20)+'...' : 'null'}`);
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    if (config.data) {
+      config.data = camelToSnake(config.data);
     }
     return config;
   }

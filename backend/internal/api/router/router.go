@@ -17,6 +17,7 @@ func Setup(
 	oh *handler.OrgHandler,
 	ph *handler.ProjectHandler,
 	ch *handler.CommentHandler,
+	bh *handler.BoardHandler,
 	jwtSecret string,
 ) *gin.Engine {
 	r := gin.New()
@@ -49,6 +50,7 @@ func Setup(
 		authed.Use(middleware.Auth(jwtSecret))
 		{
 			authed.GET("/auth/me", ah.Me)
+			authed.PATCH("/auth/me", ah.UpdateMe)
 			orgs := authed.Group("/organizations")
 			{
 				orgs.POST("", oh.Create)
@@ -69,11 +71,12 @@ func Setup(
 				projects.GET("/:projectId", ph.GetByID)
 				projects.PUT("/:projectId", ph.Update)
 				projects.DELETE("/:projectId", ph.Delete)
+				projects.GET("/:projectId/board", bh.GetByProject)
 			}
 
 			tasks := authed.Group("/projects/:projectId/tasks")
 			{
-				tasks.POST("", th.List)
+				tasks.GET("", th.List)
 				tasks.POST("/create", th.Create)
 				tasks.GET("/:taskId", th.GetByID)
 				tasks.PUT("/:taskId", th.Update)
@@ -85,12 +88,39 @@ func Setup(
 				tasks.GET("/:taskId/comments", ch.ListByTask)
 			}
 
+			authed.GET("/tasks/:taskId", th.GetByID)
+			authed.PATCH("/tasks/:taskId", th.Update)
+			authed.PUT("/tasks/:taskId", th.Update)
+			authed.DELETE("/tasks/:taskId", th.Delete)
+			authed.PATCH("/tasks/:taskId/move", th.Move)
+			authed.PUT("/tasks/:taskId/move", th.Move)
+			authed.GET("/tasks/:taskId/comments", ch.ListByTask)
+			authed.POST("/tasks/:taskId/comments", ch.Create)
+
+			boards := authed.Group("/boards")
+			{
+				boards.PATCH("/:boardId/columns", bh.UpdateColumns)
+			}
+
 			comments := authed.Group("/comments")
 			{
 				comments.GET("/:commentId", ch.GetByID)
 				comments.PUT("/:commentId", ch.Update)
 				comments.DELETE("/:commentId", ch.Delete)
 			}
+
+			authed.GET("/notifications", func(c *gin.Context) {
+				c.JSON(200, gin.H{"data": []interface{}{}, "total": 0, "page": 1, "pageSize": 20, "totalPages": 0})
+			})
+			authed.GET("/notifications/unread-count", func(c *gin.Context) {
+				c.JSON(200, 0)
+			})
+			authed.PATCH("/notifications/:id/read", func(c *gin.Context) {
+				c.JSON(200, gin.H{"status": "ok"})
+			})
+			authed.PATCH("/notifications/read-all", func(c *gin.Context) {
+				c.JSON(200, gin.H{"status": "ok"})
+			})
 		}
 	}
 

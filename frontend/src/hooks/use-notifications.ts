@@ -7,15 +7,29 @@ import type { Notification, PaginatedResponse, APIError } from '@/types/api';
 export function useNotifications(page = 1, pageSize = 20) {
   return useQuery<PaginatedResponse<Notification>>({
     queryKey: ['notifications', page, pageSize],
-    queryFn: () => apiClient.get(`/notifications?page=${page}&pageSize=${pageSize}`),
+    queryFn: async () => {
+      try {
+        return await apiClient.get<PaginatedResponse<Notification>>(`/notifications?page=${page}&pageSize=${pageSize}`);
+      } catch {
+        return { data: [], total: 0, page, pageSize, totalPages: 0 } as PaginatedResponse<Notification>;
+      }
+    },
+    retry: false,
   });
 }
 
 export function useUnreadCount() {
   return useQuery<number>({
     queryKey: ['notifications', 'unread-count'],
-    queryFn: () => apiClient.get('/notifications/unread-count'),
+    queryFn: async () => {
+      try {
+        return await apiClient.get<number>('/notifications/unread-count');
+      } catch {
+        return 0;
+      }
+    },
     refetchInterval: 30 * 1000,
+    retry: false,
   });
 }
 

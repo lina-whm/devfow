@@ -95,6 +95,10 @@ export default function LoginPage() {
               {t('auth.signUp')}
             </Link>
           </p>
+
+          <div className="mt-6 rounded-md border border-dashed px-3 py-2 text-center text-xs text-muted-foreground">
+            Demo: admin@devflow.local / password123
+          </div>
         </CardContent>
       </Card>
     </div>

@@ -32,7 +32,7 @@ const (
 	PriorityLow      Priority = "low"
 	PriorityMedium   Priority = "medium"
 	PriorityHigh     Priority = "high"
-	PriorityCritical Priority = "critical"
+	PriorityCritical Priority = "urgent"
 )
 
 func (p Priority) IsValid() bool {
