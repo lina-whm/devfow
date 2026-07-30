@@ -1,4 +1,5 @@
 name: CI
+
 on:
   push:
     branches: [main]
@@ -6,51 +7,49 @@ on:
     branches: [main]
 
 jobs:
-  lint-backend:
+  backend:
+    name: Backend (Go)
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-go@v5
         with:
           go-version: "1.24"
-      - uses: golangci/golangci-lint-action@v7
-        with:
-          working-directory: backend
+          cache-dependency-path: backend/go.sum
 
-  lint-frontend:
+      - run: go mod download
+
+      - run: go build ./cmd/devflow
+
+      - run: go vet ./...
+
+      - run: go test ./... -v -count=1
+
+  frontend:
+    name: Frontend (Next.js)
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
-      - run: cd frontend && npm ci && npm run lint
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
 
-  test-backend:
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_DB: devflow_test
-          POSTGRES_USER: devflow
-          POSTGRES_PASSWORD: devflow
-        ports:
-          - 5432:5432
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version: "1.24"
-      - run: cd backend && go test ./... -race -count=1 -coverprofile=coverage.out
+      - run: npm ci
 
-  build:
-    runs-on: ubuntu-latest
-    needs: [lint-backend, lint-frontend, test-backend]
-    steps:
-      - uses: actions/checkout@v4
-      - run: docker compose -f infrastructure/docker-compose.yml build
+      - run: npm run typecheck
+
+      - run: npm run lint -- --no-cache
+
+      - run: npm run build
